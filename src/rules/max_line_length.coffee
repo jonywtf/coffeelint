@@ -27,11 +27,19 @@ module.exports = class MaxLineLength
             Lines can be no longer than eighty characters by default.
             """
 
+    lineLen = (line) ->
+        line = line.replace /\\u([\d\w]{4})/gi , (match, grp) ->
+          String.fromCharCode parseInt(grp, 16)
+        line = unescape line
+        line = line.trimRight()
+        line = line.replace /(\r\n|\n|\r)/gm, ''
+        return line.length
+
     lintLine: (line, lineApi) ->
         max = lineApi.config[@rule.name]?.value
         limitComments = lineApi.config[@rule.name]?.limitComments
 
-        lineLength = line.trimRight().length
+        lineLength = lineLen line
         if lineApi.isLiterate() and regexes.literateComment.test(line)
             lineLength -= 2
 
